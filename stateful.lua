@@ -20,6 +20,7 @@ end
 
 function Stateful.static:addState(stateName)
   assert(self.static.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(self) )
+  assert(type(stateName) == 'string', "stateName must be a string. Got " .. tostring(stateName) .. "(" .. type(stateName) .. ")" )
 
   self.static.states[stateName] = {}
   return self.static.states[stateName]
