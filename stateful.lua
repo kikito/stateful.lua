@@ -31,6 +31,7 @@ function Stateful:gotoState(stateName)
   if stateName == nil then
     self.__currentState = nil
   else
+    assert(type(stateName)=='string', "stateName must be a string or nil. Got " .. tostring(stateName) .. "(" .. type(stateName) .. ")" )
     local state = self.class.states[stateName]
     assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
     self.__currentState = state
