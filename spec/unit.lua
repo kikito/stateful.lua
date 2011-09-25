@@ -28,6 +28,13 @@ describe("Unit tests", function()
       assert_error(function() Enemy:addState(1) end)
       assert_error(function() Enemy:addState() end)
     end)
+    it("doesn't add state callbacks to instances", function()
+      Enemy:addState("State")
+      local e = Enemy:new()
+      e:gotoState("State")
+      assert_nil(e.enterState)
+      assert_nil(e.exitState)
+    end)
   end)
 
   describe("gotoState", function()
@@ -41,8 +48,20 @@ describe("Unit tests", function()
         assert_equal(e:foo(), 'foo')
         e:gotoState('SayBar')
         assert_equal(e:foo(), 'bar')
-
       end)
+
+      test("the enterState callback is called, if it exists", function()
+        local Marked = Enemy:addState('Marked')
+
+        function Marked:enterState() self.mark = true end
+
+        local e = Enemy:new()
+        assert_nil(e.mark)
+
+        e:gotoState('Marked')
+        assert_true(e.mark)
+      end)
+
     end)
 
     it("raises an error when given an invalid id", function()
