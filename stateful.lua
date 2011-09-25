@@ -27,9 +27,14 @@ function Stateful.static:addState(stateName)
 end
 
 function Stateful:gotoState(stateName)
-  local state = self.class.states[stateName]
 
-  self.__currentState = state
+  if stateName == nil then
+    self.__currentState = nil
+  else
+    local state = self.class.states[stateName]
+    assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
+    self.__currentState = state
+  end
 end
 
 return Stateful
