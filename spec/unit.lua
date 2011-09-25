@@ -11,8 +11,33 @@ describe("Unit tests", function()
     Enemy = class('Enemy'):include(Stateful)
   end)
 
-  it("gets a new class attribute called 'states' when including the mixin", function()
+  test("a stateful class gets a new class attribute called 'states' when including the mixin", function()
     assert_type(Enemy.states, "table")
+  end)
+
+  describe("when inheriting from a stateful class", function()
+    test("the subclass inherits has a list of states, different from the superclass", function()
+      local SubEnemy = class('SubEnemy', Enemy)
+      assert_type(SubEnemy.states, "table")
+      assert_not_equal(Enemy.states, SubEnemy.states)
+    end)
+
+    test("each inherited state inherits methods from the superclass' states", function()
+      local Scary = Enemy:addState("Scary")
+      function Scary:speak() return "boo!" end
+      function Scary:fly() return "like the wind" end
+
+      local Clown = class('Clown', Enemy)
+      function Clown.states.Scary:speak() return "mock, mock!" end
+
+      local it = Clown:new()
+      it:gotoState("Scary")
+
+      assert_equal(it:fly(), "like the wind")
+      assert_equal(it:speak(), "mock, mock!")
+
+    end)
+
   end)
 
   describe("addState", function()

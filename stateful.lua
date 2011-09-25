@@ -20,26 +20,40 @@ local function _modifyInstanceDict(klass)
 
   klass.__instanceDict.__index = function(instance, name)
     if not _callbacks[name] then
-      local currentState = rawget(instance, '__currentState')
-      if currentState and currentState[name] then return currentState[name] end
+      local state = rawget(instance, '__currentState')
+      if state and state[name] then return state[name] end
     end
     if type(prevIndex) == 'function' then return prevIndex(instance, name) end
     return prevIndex[name]
   end
-
 end
 
 
 function Stateful:included(klass)
   klass.static.states = {}
   _modifyInstanceDict(klass)
+
+  local prevSubclass = klass.static.subclass
+
+  function klass.static:subclass(name)
+    local subclass = prevSubclass(klass, name)
+    subclass.static.states = {}
+
+    for stateName, state in pairs(klass.states) do
+      subclass.states[stateName] = setmetatable({}, { __index = state })
+    end
+
+    return subclass
+  end
+
+
 end
 
 function Stateful.static:addState(stateName)
-  assert(self.static.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(self) )
   assert(type(stateName) == 'string', "stateName must be a string. Got " .. tostring(stateName) .. "(" .. type(stateName) .. ")" )
+  assert(self.static.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(self) )
 
-  self.static.states[stateName] = setmetatable({}, {__index = _BaseState})
+  self.static.states[stateName] = setmetatable({}, { __index = _BaseState })
   return self.static.states[stateName]
 end
 
