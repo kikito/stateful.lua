@@ -4,7 +4,7 @@ Stateful = require 'stateful'
 
 context("Acceptance tests", function()
 
-  it("works on the basic case", function()
+  test("works on the basic case", function()
 
     local Enemy = class('Enemy')
     Enemy:include(Stateful)
@@ -35,7 +35,26 @@ context("Acceptance tests", function()
     peter:gotoState(nil)
     assert_equal(peter:speak(), 'My health is 10')
 
-   end)
+  end)
 
+  context("Errors", function()
+    test("AddState throws an error if the state is already present", function()
+
+      local Enemy = class('Enemy')
+      Enemy:include(Stateful)
+
+      function Enemy:initialize(health)
+        self.health = health
+      end
+
+      function Enemy:speak()
+        return 'My health is ' .. tostring(self.health)
+      end
+
+      local Immortal = Enemy:addState('Immortal')
+      assert_error(function() Enemy:addState('Immortal') end)
+    end)
+  end)
 
 end)
+

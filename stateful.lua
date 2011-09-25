@@ -19,6 +19,8 @@ function Stateful:included(klass)
 end
 
 function Stateful.static:addState(stateName)
+  assert(self.static.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(self) )
+
   self.static.states[stateName] = {}
   return self.static.states[stateName]
 end
