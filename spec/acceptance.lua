@@ -63,17 +63,18 @@ context("Acceptance tests", function()
   end)
 
   test("state inheritance", function()
-  
+
     function Enemy:sing() return "every move you make" end
 
     local Happy = Enemy:addState('Happy')
     function Happy:speak() return "hehehe" end
 
     local Beholder = class('Beholder', Enemy)
-    function Beholder.Happy:sing() return "I'll be watching you" end
+    function Beholder.states.Happy:sing() return "I'll be watching you" end
 
     local jimmy = Beholder:new(10)
 
+    assert_equal(jimmy:speak(), "My health is 10")
     assert_equal(jimmy:sing(), "every move you make")
     jimmy:gotoState('Happy')
     assert_equal(jimmy:sing(), "I'll be watching you")

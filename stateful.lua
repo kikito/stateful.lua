@@ -11,46 +11,60 @@ for callbackName,_ in pairs(_callbacks) do
   _BaseState[callbackName] = function() end
 end
 
+local function _assert_type(val, name, expected_type, type_to_s)
+  assert(type(val) == expected_type, "Expected " .. name .. " to be of type " .. (type_to_s or expected_type) .. ". Was " .. tostring(val) .. "(" .. type(val) .. ")")
+end
+
+local function _addStatesToClass(klass, superStates)
+  klass.static.states = {}
+  for stateName, state in pairs(superStates or {}) do
+    klass.static.states[stateName] = setmetatable({}, { __index = state })
+  end
+end
+
 local function _invokeCallback(instance, state, callbackName)
   if state then state[callbackName](instance) end
 end
 
-local function _modifyInstanceDict(klass)
-  local prevIndex = klass.__instanceDict.__index
-
-  klass.__instanceDict.__index = function(instance, name)
-    if not _callbacks[name] then
-      local state = rawget(instance, '__currentState')
-      if state and state[name] then return state[name] end
-    end
-    if type(prevIndex) == 'function' then return prevIndex(instance, name) end
-    return prevIndex[name]
+local function _getStatefulMethod(instance, name)
+  if not _callbacks[name] then
+    local state = rawget(instance, '__currentState')
+    if state and state[name] then return state[name] end
   end
 end
 
+local function _getNewInstanceIndex(prevIndex)
+  if type(prevIndex) == 'function' then
+    return function(instance, name) return _getStatefulMethod(instance, name) or prevIndex(instance, name) end
+  end
+  return function(instance, name) return _getStatefulMethod(instance, name) or prevIndex[name] end
+end
 
-function Stateful:included(klass)
-  klass.static.states = {}
-  _modifyInstanceDict(klass)
+local function _modifyInstanceIndex(klass)
+  klass.__instanceDict.__index = _getNewInstanceIndex(klass.__instanceDict.__index)
+end
 
-  local prevSubclass = klass.static.subclass
-
-  function klass.static:subclass(name)
+local function _getNewSubclassMethod(prevSubclass)
+  return function(klass, name)
     local subclass = prevSubclass(klass, name)
-    subclass.static.states = {}
-
-    for stateName, state in pairs(klass.states) do
-      subclass.states[stateName] = setmetatable({}, { __index = state })
-    end
-
+    _addStatesToClass(subclass, klass.states)
+    _modifyInstanceIndex(subclass)
     return subclass
   end
+end
 
+local function _modifySubclassMethod(klass)
+  klass.static.subclass = _getNewSubclassMethod(klass.static.subclass)
+end
 
+function Stateful:included(klass)
+  _addStatesToClass(klass)
+  _modifyInstanceIndex(klass)
+  _modifySubclassMethod(klass)
 end
 
 function Stateful.static:addState(stateName)
-  assert(type(stateName) == 'string', "stateName must be a string. Got " .. tostring(stateName) .. "(" .. type(stateName) .. ")" )
+  _assert_type(stateName, 'stateName', 'string')
   assert(self.static.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(self) )
 
   self.static.states[stateName] = setmetatable({}, { __index = _BaseState })
@@ -64,9 +78,9 @@ function Stateful:gotoState(stateName)
   if stateName == nil then
     self.__currentState = nil
   else
-    assert(type(stateName)=='string', "stateName must be a string or nil. Got " .. tostring(stateName) .. "(" .. type(stateName) .. ")" )
+    _assert_type(stateName, 'stateName', 'string', 'string or nil')
 
-    local state = self.class.states[stateName]
+    local state = self.class.static.states[stateName]
     assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
 
     _invokeCallback(self, state, 'enterState')
