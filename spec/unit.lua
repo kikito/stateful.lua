@@ -16,7 +16,7 @@ describe("Unit tests", function()
   end)
 
   describe("when inheriting from a stateful class", function()
-    test("the subclass inherits has a list of states, different from the superclass", function()
+    test("the subclass has a list of states, different from the superclass", function()
       local SubEnemy = class('SubEnemy', Enemy)
       assert_type(SubEnemy.states, "table")
       assert_not_equal(Enemy.states, SubEnemy.states)
@@ -98,6 +98,39 @@ describe("Unit tests", function()
     it("raises an error when the state doesn't exist", function()
       local e = Enemy:new()
       assert_error(function() e:gotoState('Inexisting') end)
+    end)
+  end)
+
+  describe("pushState", function()
+    describe("when given a valid state name", function()
+
+      test("The new state is used for the lookaheads, before the pushed state", function()
+        local Pushed = Enemy:addState('Pushed')
+        function Pushed:foo() return 'foo' end
+
+        local New = Enemy:addState('New')
+        function New:foo() return 'new foo' end
+
+        local e = Enemy:new()
+        e:gotoState('Pushed')
+        e:pushState('New')
+        assert_equal(e:foo(), 'new foo')
+      end)
+
+      test("The new state conserves the lookaheads, of the previous ones in the stack", function()
+        local Pushed = Enemy:addState('Pushed')
+        function Pushed:foo() return 'foo' end
+        function Pushed:bar() return 'bar' end
+
+        local New = Enemy:addState('New')
+        function New:bar() return 'new bar' end
+
+        local e = Enemy:new()
+        e:gotoState('Pushed')
+        e:pushState('New')
+        assert_equal(e:foo(), 'foo')
+      end)
+
     end)
   end)
 

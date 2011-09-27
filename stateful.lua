@@ -15,6 +15,10 @@ local function _assert_type(val, name, expected_type, type_to_s)
   assert(type(val) == expected_type, "Expected " .. name .. " to be of type " .. (type_to_s or expected_type) .. ". Was " .. tostring(val) .. "(" .. type(val) .. ")")
 end
 
+local function _invokeCallback(instance, state, callbackName)
+  if state then state[callbackName](instance) end
+end
+
 local function _addStatesToClass(klass, superStates)
   klass.static.states = {}
   for stateName, state in pairs(superStates or {}) do
@@ -22,14 +26,13 @@ local function _addStatesToClass(klass, superStates)
   end
 end
 
-local function _invokeCallback(instance, state, callbackName)
-  if state then state[callbackName](instance) end
-end
-
 local function _getStatefulMethod(instance, name)
   if not _callbacks[name] then
-    local state = rawget(instance, '__currentState')
-    if state and state[name] then return state[name] end
+    local stack = rawget(instance, '__stateStack')
+    if not stack then return end
+    for i = #stack, 1, -1 do
+      if stack[i][name] then return stack[i][name] end
+    end
   end
 end
 
@@ -38,6 +41,14 @@ local function _getNewInstanceIndex(prevIndex)
     return function(instance, name) return _getStatefulMethod(instance, name) or prevIndex(instance, name) end
   end
   return function(instance, name) return _getStatefulMethod(instance, name) or prevIndex[name] end
+end
+
+local function _getNewAllocateMethod(oldAllocateMethod)
+  return function(klass, ...)
+    local instance = oldAllocateMethod(klass, ...)
+    instance.__stateStack = {}
+    return instance
+  end
 end
 
 local function _modifyInstanceIndex(klass)
@@ -57,10 +68,15 @@ local function _modifySubclassMethod(klass)
   klass.static.subclass = _getNewSubclassMethod(klass.static.subclass)
 end
 
+local function _modifyAllocateMethod(klass)
+  klass.static.allocate = _getNewAllocateMethod(klass.static.allocate)
+end
+
 function Stateful:included(klass)
   _addStatesToClass(klass)
   _modifyInstanceIndex(klass)
   _modifySubclassMethod(klass)
+  _modifyAllocateMethod(klass)
 end
 
 function Stateful.static:addState(stateName)
@@ -73,10 +89,10 @@ end
 
 function Stateful:gotoState(stateName)
 
-  _invokeCallback(self, self.__currentState, 'exitState')
+  _invokeCallback(self, self.__stateStack[#self.__stateStack], 'exitState')
 
   if stateName == nil then
-    self.__currentState = nil
+    self.__stateStack = { }
   else
     _assert_type(stateName, 'stateName', 'string', 'string or nil')
 
@@ -85,9 +101,23 @@ function Stateful:gotoState(stateName)
 
     _invokeCallback(self, state, 'enterState')
 
-    self.__currentState = state
+    self.__stateStack = { state }
   end
 
+end
+
+function Stateful:pushState(stateName)
+
+  local state = self.class.static.states[stateName]
+  assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
+
+  table.insert(self.__stateStack, state)
+end
+
+function Stateful:popState()
+end
+
+function Stateful:popAllStates()
 end
 
 return Stateful
