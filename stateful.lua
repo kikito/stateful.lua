@@ -11,14 +11,6 @@ for callbackName,_ in pairs(_callbacks) do
   _BaseState[callbackName] = function() end
 end
 
-local function _assert_type(val, name, expected_type, type_to_s)
-  assert(type(val) == expected_type, "Expected " .. name .. " to be of type " .. (type_to_s or expected_type) .. ". Was " .. tostring(val) .. "(" .. type(val) .. ")")
-end
-
-local function _invokeCallback(instance, state, callbackName)
-  if state then state[callbackName](instance) end
-end
-
 local function _addStatesToClass(klass, superStates)
   klass.static.states = {}
   for stateName, state in pairs(superStates or {}) do
@@ -72,6 +64,32 @@ local function _modifyAllocateMethod(klass)
   klass.static.allocate = _getNewAllocateMethod(klass.static.allocate)
 end
 
+local function _assertType(val, name, expected_type, type_to_s)
+  assert(type(val) == expected_type, "Expected " .. name .. " to be of type " .. (type_to_s or expected_type) .. ". Was " .. tostring(val) .. "(" .. type(val) .. ")")
+end
+
+local function _assertInexistingState(klass, stateName)
+  assert(klass.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(klass) )
+end
+
+local function _assertExistingState(self, state, stateName)
+  assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
+end
+
+local function _invokeCallback(self, state, callbackName)
+  if state then state[callbackName](self) end
+end
+
+local function _getCurrentState(self)
+  return self.__stateStack[#self.__stateStack]
+end
+
+local function _getStateByName(self, stateName)
+  local state = self.class.static.states[stateName]
+  _assertExistingState(self, state, stateName)
+  return state
+end
+
 function Stateful:included(klass)
   _addStatesToClass(klass)
   _modifyInstanceIndex(klass)
@@ -80,38 +98,31 @@ function Stateful:included(klass)
 end
 
 function Stateful.static:addState(stateName)
-  _assert_type(stateName, 'stateName', 'string')
-  assert(self.static.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(self) )
-
+  _assertType(stateName, 'stateName', 'string')
+  _assertInexistingState(self, stateName)
   self.static.states[stateName] = setmetatable({}, { __index = _BaseState })
   return self.static.states[stateName]
 end
 
 function Stateful:gotoState(stateName)
 
-  _invokeCallback(self, self.__stateStack[#self.__stateStack], 'exitState')
+  _invokeCallback(self, _getCurrentState(self), 'exitState')
 
   if stateName == nil then
     self.__stateStack = { }
   else
-    _assert_type(stateName, 'stateName', 'string', 'string or nil')
+    _assertType(stateName, 'stateName', 'string', 'string or nil')
 
-    local state = self.class.static.states[stateName]
-    assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
-
-    _invokeCallback(self, state, 'enterState')
-
-    self.__stateStack = { state }
+    local newState = _getStateByName(self, stateName)
+    _invokeCallback(self, newState, 'enterState')
+    self.__stateStack = { newState }
   end
 
 end
 
 function Stateful:pushState(stateName)
-
-  local state = self.class.static.states[stateName]
-  assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
-
-  table.insert(self.__stateStack, state)
+  local newState = _getStateByName(self, stateName)
+  table.insert(self.__stateStack, newState)
 end
 
 function Stateful:popState()
