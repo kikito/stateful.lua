@@ -101,36 +101,56 @@ describe("Unit tests", function()
     end)
   end)
 
-  describe("pushState", function()
-    describe("when given a valid state name", function()
+  describe("state stacking", function()
+    local Pushed, New, e
+    before(function()
+      function Enemy:foo() return 'foo' end
 
+      Piled = Enemy:addState('Piled')
+      function Piled:foo() return 'foo2' end
+      function Piled:bar() return 'bar' end
+
+      New = Enemy:addState('New')
+      function New:bar() return 'new bar' end
+
+      e = Enemy:new()
+      e:gotoState('Piled')
+    end)
+
+    describe("pushState", function()
       test("The new state is used for the lookaheads, before the pushed state", function()
-        local Pushed = Enemy:addState('Pushed')
-        function Pushed:foo() return 'foo' end
-
-        local New = Enemy:addState('New')
-        function New:foo() return 'new foo' end
-
-        local e = Enemy:new()
-        e:gotoState('Pushed')
         e:pushState('New')
-        assert_equal(e:foo(), 'new foo')
+        assert_equal(e:bar(), 'new bar')
       end)
 
       test("The new state conserves the lookaheads, of the previous ones in the stack", function()
-        local Pushed = Enemy:addState('Pushed')
-        function Pushed:foo() return 'foo' end
-        function Pushed:bar() return 'bar' end
-
-        local New = Enemy:addState('New')
-        function New:bar() return 'new bar' end
-
-        local e = Enemy:new()
-        e:gotoState('Pushed')
         e:pushState('New')
+        assert_equal(e:foo(), 'foo2')
+      end)
+    end)
+
+    describe("popAllStates", function()
+      test("Renders the object stateless", function()
+        e:pushState('New')
+        e:popAllStates()
         assert_equal(e:foo(), 'foo')
       end)
+    end)
 
+    describe("popState", function()
+      test("pops a state when given a valid name", function()
+        e:pushState('New')
+        e:popState('Piled')
+        assert_equal(e:foo(), 'foo')
+        assert_equal(e:bar(), 'new bar')
+      end)
+
+      test("pops the top state when not given any name", function()
+        e:pushState('New')
+        e:popState()
+        assert_equal(e:foo(), 'foo2')
+        assert_equal(e:bar(), 'bar')
+      end)
     end)
   end)
 

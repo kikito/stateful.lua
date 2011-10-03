@@ -84,10 +84,20 @@ local function _getCurrentState(self)
   return self.__stateStack[#self.__stateStack]
 end
 
-local function _getStateByName(self, stateName)
+local function _getStateFromClassByName(self, stateName)
   local state = self.class.static.states[stateName]
   _assertExistingState(self, state, stateName)
   return state
+end
+
+local function _removeStateFromStackByName(self, stateName)
+  local target = _getStateFromClassByName(self, stateName)
+  for i = #self.__stateStack, 1, -1 do
+    if self.__stateStack[i] == target then
+      table.remove(self.__stateStack, i)
+      return
+    end
+  end
 end
 
 function Stateful:included(klass)
@@ -113,7 +123,7 @@ function Stateful:gotoState(stateName)
   else
     _assertType(stateName, 'stateName', 'string', 'string or nil')
 
-    local newState = _getStateByName(self, stateName)
+    local newState = _getStateFromClassByName(self, stateName)
     _invokeCallback(self, newState, 'enterState')
     self.__stateStack = { newState }
   end
@@ -121,14 +131,20 @@ function Stateful:gotoState(stateName)
 end
 
 function Stateful:pushState(stateName)
-  local newState = _getStateByName(self, stateName)
+  local newState = _getStateFromClassByName(self, stateName)
   table.insert(self.__stateStack, newState)
 end
 
-function Stateful:popState()
+function Stateful:popState(stateName)
+  if stateName == nil then
+    table.remove(self.__stateStack, #self.__stateStack)
+  else
+    _removeStateFromStackByName(self, stateName)
+  end
 end
 
 function Stateful:popAllStates()
+  self.__stateStack = {}
 end
 
 return Stateful

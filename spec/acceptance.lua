@@ -126,7 +126,7 @@ context("Acceptance tests", function()
     artist:popState()
     assert_equal(artist:all(), "I can't dance - I can't sing - Only thing about me is the way I walk")
 
-    artist:popState('InexistingState')
+    artist:popState('FredAstaire')
     assert_equal(artist:all(), "I can't dance - I can't sing - Only thing about me is the way I walk")
 
     artist:gotoState('FredAstaire')
