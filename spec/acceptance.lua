@@ -134,6 +134,48 @@ context("Acceptance tests", function()
 
   end)
 
+  test("stack-related callbacks", function()
+    local TweetPaused = Enemy:addState('TweetPaused')
+    function TweetPaused:pausedState() self.tweet = true end
+
+    local TootContinued = Enemy:addState('TootContinued')
+    function TootContinued:continuedState() self.toot = true end
+
+    local PamPushed = Enemy:addState('PamPushed')
+    function PamPushed:pushedState() self.pam = true end
+
+    local PopPopped = Enemy:addState('PopPopped')
+    function PopPopped:poppedState() self.pop = true end
+
+    e = Enemy:new()
+
+    e:gotoState('TweetPaused')
+    assert_nil(e.tweet)
+    e:pushState('TootContinued')
+    assert_true(e.tweet)
+
+    e:pushState('PopPopped')
+    e:popState()
+
+    assert_true(e.toot)
+    assert_true(e.pop)
+
+    e:pushState('PopPopped')
+    e:pushState('PamPushed')
+    assert_true(self.pam)
+
+    e.tweet = false
+    e.pop = false
+
+    e:popState('PopPopped')
+    assert_true(self.pop)
+
+    e:popState()
+    assert_true(self.tweet)
+
+
+  end)
+
   context("Errors", function()
     test("addState raises an error if the state is already present, or not a valid id", function()
       local Immortal = Enemy:addState('Immortal')
