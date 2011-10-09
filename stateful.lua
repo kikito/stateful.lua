@@ -1,8 +1,12 @@
 local Stateful = { static = {} }
 
 local _callbacks = {
-  enterState = 1,
-  exitState = 1
+  enteredState = 1,
+  exitedState = 1,
+  pushedState = 1,
+  poppedState = 1,
+  pausedState = 1,
+  continuedState = 1
 }
 
 local _BaseState = {}
@@ -89,15 +93,13 @@ local function _getStateFromClassByName(self, stateName)
   _assertExistingState(self, state, stateName)
   return state
 end
-
-local function _removeStateFromStackByName(self, stateName)
+local function _getStateIndexFromStackByName(self, stateName)
+  if stateName == nil then return #self.__stateStack end
   local target = _getStateFromClassByName(self, stateName)
   for i = #self.__stateStack, 1, -1 do
-    if self.__stateStack[i] == target then
-      table.remove(self.__stateStack, i)
-      return
-    end
+    if self.__stateStack[i] == target then return i end
   end
+  return 0
 end
 
 function Stateful:included(klass)
@@ -116,7 +118,7 @@ end
 
 function Stateful:gotoState(stateName)
 
-  _invokeCallback(self, _getCurrentState(self), 'exitState')
+  _invokeCallback(self, _getCurrentState(self), 'exitedState')
 
   if stateName == nil then
     self.__stateStack = { }
@@ -124,22 +126,28 @@ function Stateful:gotoState(stateName)
     _assertType(stateName, 'stateName', 'string', 'string or nil')
 
     local newState = _getStateFromClassByName(self, stateName)
-    _invokeCallback(self, newState, 'enterState')
+    _invokeCallback(self, newState, 'enteredState')
     self.__stateStack = { newState }
   end
 
 end
 
 function Stateful:pushState(stateName)
+  _invokeCallback(self, _getCurrentState(self), 'pausedState')
+
   local newState = _getStateFromClassByName(self, stateName)
+  _invokeCallback(self, newState, 'pushedState')
   table.insert(self.__stateStack, newState)
 end
 
 function Stateful:popState(stateName)
-  if stateName == nil then
-    table.remove(self.__stateStack, #self.__stateStack)
-  else
-    _removeStateFromStackByName(self, stateName)
+  local oldStateIndex = _getStateIndexFromStackByName(self, stateName)
+  local oldState = self.__stateStack[oldStateIndex]
+
+  _invokeCallback(self, oldState, 'poppedState')
+  table.remove(self.__stateStack, oldStateIndex)
+  if oldStateIndex > #self.__stateStack then
+    _invokeCallback(self, _getCurrentState(self), 'continuedState')
   end
 end
 

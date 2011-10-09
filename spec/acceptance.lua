@@ -45,8 +45,8 @@ context("Acceptance tests", function()
 
     local Drunk = Enemy:addState('Drunk')
 
-    function Drunk:enterState() self.health = self.health - 1 end
-    function Drunk:exitState() self.health = self.health + 1 end
+    function Drunk:enteredState() self.health = self.health - 1 end
+    function Drunk:exitedState() self.health = self.health + 1 end
 
     local john = Enemy:new(10)
 
@@ -54,8 +54,8 @@ context("Acceptance tests", function()
 
     john:gotoState('Drunk')
     assert_equal(john:speak(), 'My health is 9')
-    assert_type(john.enterState, 'nil')
-    assert_type(john.exitState, 'nil')
+    assert_type(john.enteredState, 'nil')
+    assert_type(john.exitedState, 'nil')
 
     john:gotoState(nil)
     assert_equal(john:speak(), 'My health is 10')
@@ -162,16 +162,16 @@ context("Acceptance tests", function()
 
     e:pushState('PopPopped')
     e:pushState('PamPushed')
-    assert_true(self.pam)
+    assert_true(e.pam)
 
-    e.tweet = false
+    e.toot = false
     e.pop = false
 
     e:popState('PopPopped')
-    assert_true(self.pop)
+    assert_true(e.pop)
 
     e:popState()
-    assert_true(self.tweet)
+    assert_true(e.toot)
 
 
   end)

@@ -75,10 +75,10 @@ describe("Unit tests", function()
         assert_equal(e:foo(), 'bar')
       end)
 
-      test("the enterState callback is called, if it exists", function()
+      test("the enteredState callback is called, if it exists", function()
         local Marked = Enemy:addState('Marked')
 
-        function Marked:enterState() self.mark = true end
+        function Marked:enteredState() self.mark = true end
 
         local e = Enemy:new()
         assert_nil(e.mark)
@@ -127,6 +127,18 @@ describe("Unit tests", function()
         e:pushState('New')
         assert_equal(e:foo(), 'foo2')
       end)
+
+      test("It invokes the pushedState callback, if it exists", function()
+        function New:pushedState() self.mark = true end
+        e:pushState('New')
+        assert_true(e.mark)
+      end)
+
+      test("If the current state has a paused state, it gets invoked", function()
+        function Piled:pausedState() self.mark = true end
+        e:pushState('New')
+        assert_true(e.mark)
+      end)
     end)
 
     describe("popAllStates", function()
@@ -138,18 +150,42 @@ describe("Unit tests", function()
     end)
 
     describe("popState", function()
-      test("pops a state when given a valid name", function()
-        e:pushState('New')
-        e:popState('Piled')
-        assert_equal(e:foo(), 'foo')
-        assert_equal(e:bar(), 'new bar')
+
+      describe("when given a valid name", function()
+        test("pops the state by name", function()
+          e:pushState('New')
+          e:popState('Piled')
+          assert_equal(e:foo(), 'foo')
+          assert_equal(e:bar(), 'new bar')
+        end)
+        test("invokes the poppedState on the popped state, if it exists", function()
+          function Piled:poppedState() self.popped = true end
+          e:pushState('New')
+          e:popState('Piled')
+          assert_true(e.popped)
+        end)
       end)
 
-      test("pops the top state when not given any name", function()
-        e:pushState('New')
-        e:popState()
-        assert_equal(e:foo(), 'foo2')
-        assert_equal(e:bar(), 'bar')
+      describe("when not given a name", function()
+        test("pops the top state", function()
+          e:pushState('New')
+          e:popState()
+          assert_equal(e:foo(), 'foo2')
+          assert_equal(e:bar(), 'bar')
+        end)
+
+        test("invokes the poppedState callback on the old state", function()
+          function Piled:poppedState() self.popped = true end
+          e:popState()
+          assert_true(e.popped)
+        end)
+
+        test("invokes the continuedState on the new state, if it exists", function()
+          function Piled:continuedState() self.continued = true end
+          e:pushState('New')
+          e:popState()
+          assert_true(e.continued)
+        end)
       end)
     end)
   end)
