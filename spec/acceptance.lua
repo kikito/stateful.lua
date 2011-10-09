@@ -147,6 +147,12 @@ context("Acceptance tests", function()
     local PopPopped = Enemy:addState('PopPopped')
     function PopPopped:poppedState() self.pop = true end
 
+    local QuackExited = Enemy:addState('QuackExited')
+    function QuackExited:exitedState() self.quack = true end
+
+    local MooEntered = Enemy:addState('MooEntered')
+    function MooEntered:enteredState() self.moo = true end
+
     e = Enemy:new()
 
     e:gotoState('TweetPaused')
@@ -173,6 +179,14 @@ context("Acceptance tests", function()
     e:popState()
     assert_true(e.toot)
 
+    e:pushState('QuackExited')
+    e:pushState('MooEntered')
+    assert_true(e.moo)
+    assert_true(e.quack)
+
+    e.quack = false
+    e:popState('QuackExited')
+    assert_true(e.quack)
 
   end)
 

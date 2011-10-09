@@ -134,6 +134,18 @@ describe("Unit tests", function()
         assert_true(e.mark)
       end)
 
+      test("It invokes the enteredState callback, if it exists", function()
+        function New:enteredState() self.mark = true end
+        e:pushState('New')
+        assert_true(e.mark)
+      end)
+
+      test("It invokes the exitedState callback on the previous state", function()
+        function Piled:exitedState() self.mark = true end
+        e:pushState('New')
+        assert_true(e.mark)
+      end)
+
       test("If the current state has a paused state, it gets invoked", function()
         function Piled:pausedState() self.mark = true end
         e:pushState('New')
@@ -163,6 +175,11 @@ describe("Unit tests", function()
           e:pushState('New')
           e:popState('Piled')
           assert_true(e.popped)
+        end)
+        test("invokes the exitstate on the previous state, if it has changed", function()
+          function Piled:exitedState() self.exited = true end
+          e:pushState('New')
+          assert_true(e.exited)
         end)
       end)
 

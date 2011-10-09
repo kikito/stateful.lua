@@ -133,10 +133,13 @@ function Stateful:gotoState(stateName)
 end
 
 function Stateful:pushState(stateName)
-  _invokeCallback(self, _getCurrentState(self), 'pausedState')
+  local oldState = _getCurrentState(self)
+  _invokeCallback(self, oldState, 'pausedState')
+  _invokeCallback(self, oldState, 'exitedState')
 
   local newState = _getStateFromClassByName(self, stateName)
   _invokeCallback(self, newState, 'pushedState')
+  _invokeCallback(self, newState, 'enteredState')
   table.insert(self.__stateStack, newState)
 end
 
@@ -145,9 +148,14 @@ function Stateful:popState(stateName)
   local oldState = self.__stateStack[oldStateIndex]
 
   _invokeCallback(self, oldState, 'poppedState')
+  _invokeCallback(self, oldState, 'exitedState')
+
   table.remove(self.__stateStack, oldStateIndex)
-  if oldStateIndex > #self.__stateStack then
-    _invokeCallback(self, _getCurrentState(self), 'continuedState')
+
+  local newState = _getCurrentState(self)
+
+  if oldState ~= newState then
+    _invokeCallback(self, newState, 'continuedState')
   end
 end
 
