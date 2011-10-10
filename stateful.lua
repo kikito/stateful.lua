@@ -126,8 +126,8 @@ function Stateful:gotoState(stateName)
     _assertType(stateName, 'stateName', 'string', 'string or nil')
 
     local newState = _getStateFromClassByName(self, stateName)
-    _invokeCallback(self, newState, 'enteredState')
     self.__stateStack = { newState }
+    _invokeCallback(self, newState, 'enteredState')
   end
 
 end
@@ -138,9 +138,10 @@ function Stateful:pushState(stateName)
   _invokeCallback(self, oldState, 'exitedState')
 
   local newState = _getStateFromClassByName(self, stateName)
+  table.insert(self.__stateStack, newState)
+
   _invokeCallback(self, newState, 'pushedState')
   _invokeCallback(self, newState, 'enteredState')
-  table.insert(self.__stateStack, newState)
 end
 
 function Stateful:popState(stateName)
