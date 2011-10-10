@@ -145,6 +145,7 @@ function Stateful:pushState(stateName)
 end
 
 function Stateful:popState(stateName)
+
   local oldStateIndex = _getStateIndexFromStackByName(self, stateName)
   local oldState = self.__stateStack[oldStateIndex]
 
@@ -161,7 +162,15 @@ function Stateful:popState(stateName)
 end
 
 function Stateful:popAllStates()
-  self.__stateStack = {}
+  local size = #self.__stateStack
+  for i=1,size do self:popState() end
+end
+
+function Stateful:getCurrentStateName()
+  local currentState = _getCurrentState(self)
+  for name,state in pairs(self.class.static.states) do
+    if state == currentState then return name end
+  end
 end
 
 return Stateful
