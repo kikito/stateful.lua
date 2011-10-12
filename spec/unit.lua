@@ -38,6 +38,23 @@ describe("Unit tests", function()
 
     end)
 
+    test("states can be inherited individually too", function()
+      function Enemy:speak() return 'booboo' end
+
+      local Funny = Enemy:addState("Funny")
+      function Funny:laugh() return "hahaha" end
+
+      local VeryFunny = Enemy:addState("VeryFunny", Funny)
+      function VeryFunny:laughMore() return "hehehe" end
+
+      local albert = Enemy:new()
+      albert:gotoState('VeryFunny')
+      assert_equal(albert:speak(), "booboo")
+      assert_equal(albert:laugh(), "hahaha")
+      assert_equal(albert:laughMore(), "hehehe")
+
+    end)
+
   end)
 
   describe("addState", function()

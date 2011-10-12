@@ -64,7 +64,8 @@ context("Acceptance tests", function()
 
   test("state inheritance", function()
 
-    function Enemy:sing() return "every move you make" end
+    function Enemy:sing() return "dadadada" end
+    function Enemy:singMore() return "lalalala" end
 
     local Happy = Enemy:addState('Happy')
     function Happy:speak() return "hehehe" end
@@ -72,12 +73,20 @@ context("Acceptance tests", function()
     local Stalker = class('Stalker', Enemy)
     function Stalker.states.Happy:sing() return "I'll be watching you" end
 
+    local VeryHappy = Stalker:addState('VeryHappy', Happy)
+    function VeryHappy:sing() return 'hehey' end
+
     local jimmy = Stalker:new(10)
 
     assert_equal(jimmy:speak(), "My health is 10")
-    assert_equal(jimmy:sing(), "every move you make")
+    assert_equal(jimmy:sing(), "dadadada")
     jimmy:gotoState('Happy')
     assert_equal(jimmy:sing(), "I'll be watching you")
+    assert_equal(jimmy:singMore(), "lalalala")
+    assert_equal(jimmy:speak(), "hehehe")
+    jimmy:gotoState('VeryHappy')
+    assert_equal(jimmy:sing(), 'hehey')
+    assert_equal(jimmy:singMore(), "lalalala")
     assert_equal(jimmy:speak(), "hehehe")
 
   end)
@@ -153,7 +162,7 @@ context("Acceptance tests", function()
     local MooEntered = Enemy:addState('MooEntered')
     function MooEntered:enteredState() self.moo = true end
 
-    e = Enemy:new()
+    local e = Enemy:new()
 
     e:gotoState('TweetPaused')
     assert_nil(e.tweet)

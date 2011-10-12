@@ -18,7 +18,7 @@ end
 local function _addStatesToClass(klass, superStates)
   klass.static.states = {}
   for stateName, state in pairs(superStates or {}) do
-    klass.static.states[stateName] = setmetatable({}, { __index = state })
+    klass:addState(stateName,state)
   end
 end
 
@@ -109,10 +109,11 @@ function Stateful:included(klass)
   _modifyAllocateMethod(klass)
 end
 
-function Stateful.static:addState(stateName)
+function Stateful.static:addState(stateName, superState)
+  superState = superState or _BaseState
   _assertType(stateName, 'stateName', 'string')
   _assertInexistingState(self, stateName)
-  self.static.states[stateName] = setmetatable({}, { __index = _BaseState })
+  self.static.states[stateName] = setmetatable({}, { __index = superState })
   return self.static.states[stateName]
 end
 
