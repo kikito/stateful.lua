@@ -206,6 +206,26 @@ context("Acceptance tests", function()
 
   end)
 
+  test("debugging", function()
+    local State1 = Enemy:addState('State1')
+    local State2 = Enemy:addState('State2')
+
+    local e = Enemy:new()
+    local info = e:getStateStackDebugInfo()
+    assert_equal(#info,0)
+
+    e:pushState('State1')
+    info = e:getStateStackDebugInfo()
+    assert_equal(#info,1)
+    assert_equal(info[1], 'State1')
+
+    e:pushState('State2')
+    info = e:getStateStackDebugInfo()
+    assert_equal(#info,2)
+    assert_equal(info[1], 'State2')
+    assert_equal(info[2], 'State1')
+  end)
+
   context("Errors", function()
     test("addState raises an error if the state is already present, or not a valid id", function()
       local Immortal = Enemy:addState('Immortal')

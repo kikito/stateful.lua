@@ -1,3 +1,12 @@
+-- stateful.lua - v1.0 (2011-10)
+-- requires middleclass 2.0
+
+-- Copyright (c) 2011 Enrique García Cota
+-- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+-- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-- Based on YaciCode, from Julien Patte and LuaObject, from Sebastien Rocca-Serra
+
 local Stateful = { static = {} }
 
 local _callbacks = {
@@ -93,6 +102,7 @@ local function _getStateFromClassByName(self, stateName)
   _assertExistingState(self, state, stateName)
   return state
 end
+
 local function _getStateIndexFromStackByName(self, stateName)
   if stateName == nil then return #self.__stateStack end
   local target = _getStateFromClassByName(self, stateName)
@@ -100,6 +110,12 @@ local function _getStateIndexFromStackByName(self, stateName)
     if self.__stateStack[i] == target then return i end
   end
   return 0
+end
+
+local function _getStateName(self, target)
+  for name,state in pairs(self.class.static.states) do
+    if state == target then return name end
+  end
 end
 
 function Stateful:included(klass)
@@ -167,11 +183,13 @@ function Stateful:popAllStates()
   for i=1,size do self:popState() end
 end
 
-function Stateful:getCurrentStateName()
-  local currentState = _getCurrentState(self)
-  for name,state in pairs(self.class.static.states) do
-    if state == currentState then return name end
+function Stateful:getStateStackDebugInfo()
+  local info, state = {}, nil
+  for i=#self.__stateStack,1,-1 do
+    state = self.__stateStack[i]
+    table.insert(info, _getStateName(self, state))
   end
+  return info
 end
 
 return Stateful
