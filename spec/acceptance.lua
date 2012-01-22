@@ -191,7 +191,7 @@ context("Acceptance tests", function()
     e:pushState('QuackExited')
     e:pushState('MooEntered')
     assert_true(e.moo)
-    assert_true(e.quack)
+    assert_nil(e.quack)
 
     e.quack = false
     e:popState('QuackExited')

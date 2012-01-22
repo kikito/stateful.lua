@@ -152,7 +152,6 @@ end
 function Stateful:pushState(stateName)
   local oldState = _getCurrentState(self)
   _invokeCallback(self, oldState, 'pausedState')
-  _invokeCallback(self, oldState, 'exitedState')
 
   local newState = _getStateFromClassByName(self, stateName)
   table.insert(self.__stateStack, newState)
