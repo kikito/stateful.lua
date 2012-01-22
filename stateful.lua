@@ -86,7 +86,7 @@ local function _assertInexistingState(klass, stateName)
 end
 
 local function _assertExistingState(self, state, stateName)
-  assert(state, "The state" .. stateName .. " was not found in class " .. tostring(self.class) )
+  assert(state, "The state " .. stateName .. " was not found in " .. tostring(self.class) )
 end
 
 local function _invokeCallback(self, state, callbackName)
