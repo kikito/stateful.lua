@@ -1,4 +1,4 @@
--- stateful.lua - v1.0 (2011-10)
+-- stateful.lua - v1.0.1 (2011-10)
 -- requires middleclass 2.0
 
 -- Copyright (c) 2011 Enrique García Cota
