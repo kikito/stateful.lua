@@ -89,8 +89,8 @@ local function _assertExistingState(self, state, stateName)
   assert(state, "The state " .. stateName .. " was not found in " .. tostring(self.class) )
 end
 
-local function _invokeCallback(self, state, callbackName)
-  if state then state[callbackName](self) end
+local function _invokeCallback(self, state, callbackName, ...)
+  if state then state[callbackName](self, ...) end
 end
 
 local function _getCurrentState(self)
@@ -133,9 +133,9 @@ function Stateful.static:addState(stateName, superState)
   return self.static.states[stateName]
 end
 
-function Stateful:gotoState(stateName)
+function Stateful:gotoState(stateName, ...)
 
-  _invokeCallback(self, _getCurrentState(self), 'exitedState')
+  _invokeCallback(self, _getCurrentState(self), 'exitedState', ...)
 
   if stateName == nil then
     self.__stateStack = { }
@@ -144,7 +144,7 @@ function Stateful:gotoState(stateName)
 
     local newState = _getStateFromClassByName(self, stateName)
     self.__stateStack = { newState }
-    _invokeCallback(self, newState, 'enteredState')
+    _invokeCallback(self, newState, 'enteredState', ...)
   end
 
 end
