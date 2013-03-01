@@ -1,5 +1,7 @@
 h1. Stateful
 
+[![Build Status](https://travis-ci.org/kikito/stateful.lua.png?branch=master)](https://travis-ci.org/kikito/stateful.lua)
+
 Lua Stateful OOP mixin to be used with "middleclass":https://github.com/kikito/middleclass
 
 * Classes gain the capacity of creating "states"
