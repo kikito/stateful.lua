@@ -104,6 +104,17 @@ describe("Unit tests", function()
         assert_true(e.mark)
       end)
 
+      it("passes all additional arguments to enteredState and exitedState", function()
+        local FooEnemy = Enemy:addState("FooEnemy")
+        local testValue = "Bar"
+
+        local validateVarargs = function(self, ...) assert_equal(..., testValue) end
+        FooEnemy.enteredState = validateVarargs
+        FooEnemy.exitedState = validateVarargs
+
+        local e = Enemy:new()
+        e:gotoState("FooEnemy", testValue)
+      end)
     end)
 
     it("raises an error when given an invalid id", function()
