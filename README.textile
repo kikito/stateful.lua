@@ -13,8 +13,8 @@ h1. Example
 What follows is a basic example:
 
 <pre>
-require 'middleclass'
-Stateful = require 'stateful'
+local class    = require 'middleclass'
+local Stateful = require 'stateful'
 
 local Enemy = class('Enemy')
 Enemy:include(Stateful)
@@ -56,7 +56,7 @@ First, make sure that you have downloaded and installed "middleclass":https://gi
 
 Just copy the stateful.lua file wherever you want it (for example on a lib/ folder). Then write this in any Lua file where you want to use it:
 
-<pre>require 'middleclass'
+<pre>local class = require 'middleclass'
 local Stateful = require 'stateful'</pre>
 
 The @package.path@ variable must be configured so that the folder in which stateful.lua is copied is available, of course.
