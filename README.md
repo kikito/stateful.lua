@@ -61,8 +61,6 @@ local Stateful = require 'stateful'
 
 The `package.path` variable must be configured so that the folder in which stateful.lua is copied is available, of course.
 
-Please make sure that you read the license, too (for your convenience it's now included at the beginning of the middleclass.lua file).
-
 # Specs
 
 This project uses [busted](http://olivinelabs.com/busted/) for its specs. In order to run them, install busted, and then execute it on the top folder:
