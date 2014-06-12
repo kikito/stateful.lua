@@ -1,6 +1,6 @@
 # Stateful
 
-![](https://travis-ci.org/kikito/stateful.lua.png?branch=master!:https://travis-ci.org/kikito/stateful.lua)
+[![Build Status](https://travis-ci.org/kikito/stateful.lua.svg?branch=master)](https://travis-ci.org/kikito/stateful.lua)
 
 * Classes gain the capacity of creating "states"
 * States can override instance methods and create new ones
