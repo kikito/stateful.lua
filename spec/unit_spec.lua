@@ -1,26 +1,26 @@
 local class    = require 'spec.lib.middleclass'
 local Stateful = require 'stateful'
 
-describe("Unit tests", function()
+describe("A Stateful class", function()
 
   local Enemy
 
-  before(function()
+  before_each(function()
     Enemy = class('Enemy'):include(Stateful)
   end)
 
-  test("a stateful class gets a new class attribute called 'states' when including the mixin", function()
-    assert_type(Enemy.states, "table")
+  it("gets a new class attribute called 'states' when including the mixin", function()
+    assert.equals(type(Enemy.states), "table")
   end)
 
-  describe("when inheriting from a stateful class", function()
-    test("the subclass has a list of states, different from the superclass", function()
+  describe("when intheriting from another stateful class", function()
+    it("has a list of states, different from the superclass", function()
       local SubEnemy = class('SubEnemy', Enemy)
-      assert_type(SubEnemy.states, "table")
-      assert_not_equal(Enemy.states, SubEnemy.states)
+      assert.equals(type(SubEnemy.states), "table")
+      assert.not_equals(Enemy.states, SubEnemy.states)
     end)
 
-    test("each inherited state inherits methods from the superclass' states", function()
+    it("each inherited state inherits methods from the superclass' states", function()
       local Scary = Enemy:addState("Scary")
       function Scary:speak() return "boo!" end
       function Scary:fly() return "like the wind" end
@@ -31,12 +31,11 @@ describe("Unit tests", function()
       local it = Clown:new()
       it:gotoState("Scary")
 
-      assert_equal(it:fly(), "like the wind")
-      assert_equal(it:speak(), "mock, mock!")
-
+      assert.equals(it:fly(), "like the wind")
+      assert.equals(it:speak(), "mock, mock!")
     end)
 
-    test("states can be inherited individually too", function()
+    it("states can be inherited individually too", function()
       function Enemy:speak() return 'booboo' end
 
       local Funny = Enemy:addState("Funny")
@@ -47,66 +46,65 @@ describe("Unit tests", function()
 
       local albert = Enemy:new()
       albert:gotoState('VeryFunny')
-      assert_equal(albert:speak(), "booboo")
-      assert_equal(albert:laugh(), "hahaha")
-      assert_equal(albert:laughMore(), "hehehe")
-
+      assert.equals(albert:speak(), "booboo")
+      assert.equals(albert:laugh(), "hahaha")
+      assert.equals(albert:laughMore(), "hehehe")
     end)
 
   end)
 
-  describe("addState", function()
+  describe(":addState", function()
     it("adds an entry to class.states when given a valid, new name", function()
       Enemy:addState("State")
-      assert_type(Enemy.states.State, "table")
+      assert.equals(type(Enemy.states.State), "table")
     end)
     it("throws an error when given the name of an already existing state", function()
       Enemy:addState("State")
-      assert_error(function() Enemy:addState("State") end)
+      assert.error(function() Enemy:addState("State") end)
     end)
     it("throws an error when given a non-string name", function()
-      assert_error(function() Enemy:addState(1) end)
-      assert_error(function() Enemy:addState() end)
+      assert.error(function() Enemy:addState(1) end)
+      assert.error(function() Enemy:addState() end)
     end)
     it("doesn't add state callbacks to instances", function()
       Enemy:addState("State")
       local e = Enemy:new()
       e:gotoState("State")
-      assert_nil(e.enterState)
-      assert_nil(e.exitState)
+      assert.is_nil(e.enterState)
+      assert.is_nil(e.exitState)
     end)
   end)
 
-  describe("gotoState", function()
+  describe(":gotoState", function()
     describe("when given a valid state name", function()
-      test("the class instances use that state methods instead of the default ones", function()
+      it("makes the class instances use that state methods instead of the default ones", function()
         function Enemy:foo() return 'foo' end
         local SayBar = Enemy:addState('SayBar')
         function SayBar:foo() return 'bar' end
 
         local e = Enemy:new()
-        assert_equal(e:foo(), 'foo')
+        assert.equals(e:foo(), 'foo')
         e:gotoState('SayBar')
-        assert_equal(e:foo(), 'bar')
+        assert.equals(e:foo(), 'bar')
       end)
 
-      test("the enteredState callback is called, if it exists", function()
+      it("calls enteredState callback, if it exists", function()
         local Marked = Enemy:addState('Marked')
 
         function Marked:enteredState() self.mark = true end
 
         local e = Enemy:new()
-        assert_nil(e.mark)
+        assert.is_nil(e.mark)
 
         e:gotoState('Marked')
-        assert_true(e.mark)
+        assert.is_true(e.mark)
       end)
 
       it("passes all additional arguments to enteredState and exitedState", function()
         local FooEnemy = Enemy:addState("FooEnemy")
         local testValue = "Bar"
 
-        local validateVarargs = function(self, ...) assert_equal(..., testValue) end
+        local validateVarargs = function(self, ...) assert.equals(..., testValue) end
         FooEnemy.enteredState = validateVarargs
         FooEnemy.exitedState = validateVarargs
 
@@ -117,19 +115,19 @@ describe("Unit tests", function()
 
     it("raises an error when given an invalid id", function()
       local e = Enemy:new()
-      assert_error(function() e:gotoState(1) end)
-      assert_error(function() e:gotoState({}) end)
+      assert.error(function() e:gotoState(1) end)
+      assert.error(function() e:gotoState({}) end)
     end)
 
     it("raises an error when the state doesn't exist", function()
       local e = Enemy:new()
-      assert_error(function() e:gotoState('Inexisting') end)
+      assert.error(function() e:gotoState('Inexisting') end)
     end)
   end)
 
   describe("state stacking", function()
     local Pushed, New, e
-    before(function()
+    before_each(function()
       function Enemy:foo() return 'foo' end
 
       Piled = Enemy:addState('Piled')
@@ -144,117 +142,117 @@ describe("Unit tests", function()
     end)
 
     describe("pushState", function()
-      test("The new state is used for the lookaheads, before the pushed state", function()
+      it("uses the new state state for the lookaheads, before the pushed state", function()
         e:pushState('New')
-        assert_equal(e:bar(), 'new bar')
+        assert.equals(e:bar(), 'new bar')
       end)
 
-      test("The new state conserves the lookaheads, of the previous ones in the stack", function()
+      it("looks up in the stack if the top state doesn't have a method", function()
         e:pushState('New')
-        assert_equal(e:foo(), 'foo2')
+        assert.equals(e:foo(), 'foo2')
       end)
 
-      test("It invokes the pushedState callback, if it exists", function()
+      it("invokes the pushedState callback, if it exists", function()
         function New:pushedState() self.mark = true end
         e:pushState('New')
-        assert_true(e.mark)
+        assert.is_true(e.mark)
       end)
 
-      test("It invokes the enteredState callback, if it exists", function()
+      it("invokes the enteredState callback, if it exists", function()
         function New:enteredState() self.mark = true end
         e:pushState('New')
-        assert_true(e.mark)
+        assert.is_true(e.mark)
       end)
 
-      test("It does not invoke the exitedState callback on the previous state", function()
+      it("does not invoke the exitedState callback on the previous state", function()
         function Piled:exitedState() self.mark = true end
         e:pushState('New')
-        assert_nil(e.mark)
+        assert.is_nil(e.mark)
       end)
 
-      test("If the current state has a paused state, it gets invoked", function()
+      it("If the current state has a paused state, it gets invoked", function()
         function Piled:pausedState() self.mark = true end
         e:pushState('New')
-        assert_true(e.mark)
+        assert.is_true(e.mark)
       end)
     end)
 
-    describe("popAllStates", function()
-      test("Renders the object stateless", function()
+    describe(":popAllStates", function()
+      it("Renders the object stateless", function()
         e:pushState('New')
         e:popAllStates()
-        assert_equal(e:foo(), 'foo')
+        assert.is_equal(e:foo(), 'foo')
       end)
 
-      test("Invokes callbacks in the right order", function()
+      it("Invokes callbacks in the right order", function()
         function Piled:poppedState() self.popped = true end
         function New:exitedState() self.exited = true end
         e:pushState('New')
         e:popAllStates()
-        assert_true(e.popped)
-        assert_true(e.exited)
+        assert.is_true(e.popped)
+        assert.is_true(e.exited)
       end)
     end)
 
-    describe("popState", function()
+    describe(":popState", function()
 
       describe("when given a valid name", function()
-        test("pops the state by name", function()
+        it("pops the state by name", function()
           e:pushState('New')
           e:popState('Piled')
-          assert_equal(e:foo(), 'foo')
-          assert_equal(e:bar(), 'new bar')
+          assert.equals(e:foo(), 'foo')
+          assert.equals(e:bar(), 'new bar')
         end)
-        test("invokes the poppedState on the popped state, if it exists", function()
+        it("invokes the poppedState on the popped state, if it exists", function()
           function Piled:poppedState() self.popped = true end
           e:pushState('New')
           e:popState('Piled')
-          assert_true(e.popped)
+          assert.is_true(e.popped)
         end)
-        test("invokes the exitstate on the state that is removed from the pile", function()
+        it("invokes the exitstate on the state that is removed from the pile", function()
           function Piled:exitedState() self.exited = true end
           e:pushState('New')
           e:popState('Piled')
-          assert_true(e.exited)
+          assert.is_true(e.exited)
         end)
       end)
 
       describe("when not given a name", function()
-        test("pops the top state", function()
+        it("pops the top state", function()
           e:pushState('New')
           e:popState()
-          assert_equal(e:foo(), 'foo2')
-          assert_equal(e:bar(), 'bar')
+          assert.equals(e:foo(), 'foo2')
+          assert.equals(e:bar(), 'bar')
         end)
 
-        test("invokes the poppedState callback on the old state", function()
+        it("invokes the poppedState callback on the old state", function()
           function Piled:poppedState() self.popped = true end
           e:popState()
-          assert_true(e.popped)
+          assert.is_true(e.popped)
         end)
 
-        test("invokes the continuedState on the new state, if it exists", function()
+        it("invokes the continuedState on the new state, if it exists", function()
           function Piled:continuedState() self.continued = true end
           e:pushState('New')
           e:popState()
-          assert_true(e.continued)
+          assert.is_true(e.continued)
         end)
 
-        test("throws an error if the state doesn't exist", function()
+        it("throws an error if the state doesn't exist", function()
           e:popState()
-          assert_error(function() e:popState('Inexisting') end)
+          assert.error(function() e:popState('Inexisting') end)
         end)
       end)
     end)
   end)
 
-  describe('getStateStackDebugInfo', function()
-    test("returns an empty table on the nil state", function()
+  describe(':getStateStackDebugInfo', function()
+    it("returns an empty table on the nil state", function()
       local e = Enemy:new()
       local info = e:getStateStackDebugInfo()
-      assert_equal(#info, 0)
+      assert.equals(#info, 0)
     end)
-    test("returns the name of the current state", function()
+    it("returns the name of the current state", function()
       local State1 = Enemy:addState('State1')
       local State2 = Enemy:addState('State2')
       local e = Enemy:new()
@@ -263,10 +261,9 @@ describe("Unit tests", function()
       e:pushState('State2')
 
       local info = e:getStateStackDebugInfo()
-      assert_equal(#info, 2)
-      assert_equal(info[1], 'State2')
-      assert_equal(info[2], 'State1')
+      assert.equals(#info, 2)
+      assert.equals(info[1], 'State2')
+      assert.equals(info[2], 'State1')
     end)
   end)
-
 end)

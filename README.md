@@ -59,14 +59,14 @@ local class = require 'middleclass'
 local Stateful = require 'stateful'
 ```
 
-The @package.path@ variable must be configured so that the folder in which stateful.lua is copied is available, of course.
+The `package.path` variable must be configured so that the folder in which stateful.lua is copied is available, of course.
 
 Please make sure that you read the license, too (for your convenience it's now included at the beginning of the middleclass.lua file).
 
 # Specs
 
-This project uses [telescope](https://github.com/norman/telescope) for its specs. If you want to run the specs, you will have to install telescope first. Then just execute the following from the root inspect folder:
+This project uses [busted](http://olivinelabs.com/busted/) for its specs. In order to run them, install busted, and then execute it on the top folder:
 
 ```
-tsc -f spec/*.lua
+busted
 ```
