@@ -1,6 +1,6 @@
-h1. Stateful
+# Stateful
 
-!https://travis-ci.org/kikito/stateful.lua.png?branch=master!:https://travis-ci.org/kikito/stateful.lua
+![](https://travis-ci.org/kikito/stateful.lua.png?branch=master!:https://travis-ci.org/kikito/stateful.lua)
 
 * Classes gain the capacity of creating "states"
 * States can override instance methods and create new ones
@@ -8,11 +8,9 @@ h1. Stateful
 * States are stackable - the state on the top of the stack is the most prioritary
 * There are callback functions invoked automatically when a state is entered, exited, pushed, popped ...
 
-h1. Example
+# Example
 
-What follows is a basic example:
-
-<pre>
+``` lua
 local class    = require 'middleclass'
 local Stateful = require 'stateful'
 
@@ -47,26 +45,28 @@ peter:speak() -- I am UNBREAKABLE!!
 peter:die() -- I can not die now!
 peter:gotoState(nil)
 peter:speak() -- My health is 10
-</pre>
+```
 
 
-h1. Installation
+# Installation
 
-First, make sure that you have downloaded and installed "middleclass":https://github.com/kikito/middleclass
+First, make sure that you have downloaded and installed [middleclass](https://github.com/kikito/middleclass)
 
 Just copy the stateful.lua file wherever you want it (for example on a lib/ folder). Then write this in any Lua file where you want to use it:
 
-<pre>local class = require 'middleclass'
-local Stateful = require 'stateful'</pre>
+``` lua
+local class = require 'middleclass'
+local Stateful = require 'stateful'
+```
 
 The @package.path@ variable must be configured so that the folder in which stateful.lua is copied is available, of course.
 
 Please make sure that you read the license, too (for your convenience it's now included at the beginning of the middleclass.lua file).
 
-h1. Specs
+# Specs
 
-This project uses "telescope":https://github.com/norman/telescope for its specs. If you want to run the specs, you will have to install telescope first. Then just execute the following from the root inspect folder:
+This project uses [telescope](https://github.com/norman/telescope) for its specs. If you want to run the specs, you will have to install telescope first. Then just execute the following from the root inspect folder:
 
-<pre>
+```
 tsc -f spec/*.lua
-</pre>
+```
