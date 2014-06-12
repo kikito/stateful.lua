@@ -1,7 +1,5 @@
-require 'spec/lib/middleclass'
-
-Stateful = require 'stateful'
-
+local class    = require 'spec.lib.middleclass'
+local Stateful = require 'stateful'
 
 describe("Unit tests", function()
 
