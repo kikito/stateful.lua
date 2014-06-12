@@ -111,6 +111,27 @@ describe("A Stateful class", function()
         local e = Enemy:new()
         e:gotoState("FooEnemy", testValue)
       end)
+
+      describe('when there are several states in the stack', function()
+        it("calls exitedState in all the stacked states", function()
+          local counter = 0
+          local count = function() counter = counter + 1 end
+          local Jumping  = Enemy:addState('Jumping')
+          local Firing   = Enemy:addState('Firing')
+          local Shouting = Enemy:addState('Shouting')
+
+          Jumping.exitedState   = count
+          Firing.exitedState    = count
+
+          local e = Enemy:new()
+          e:pushState('Jumping')
+          e:pushState('Firing')
+
+          e:gotoState('Shouting')
+
+          assert.equals(counter, 2)
+        end)
+      end)
     end)
 
     it("raises an error when given an invalid id", function()

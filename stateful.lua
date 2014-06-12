@@ -135,7 +135,7 @@ end
 
 function Stateful:gotoState(stateName, ...)
 
-  _invokeCallback(self, _getCurrentState(self), 'exitedState', ...)
+  self:popAllStates()
 
   if stateName == nil then
     self.__stateStack = { }
