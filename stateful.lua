@@ -20,10 +20,6 @@ local _callbacks = {
 
 local _BaseState = {}
 
-for callbackName,_ in pairs(_callbacks) do
-  _BaseState[callbackName] = function() end
-end
-
 local function _addStatesToClass(klass, superStates)
   klass.static.states = {}
   for stateName, state in pairs(superStates or {}) do
@@ -90,7 +86,7 @@ local function _assertExistingState(self, state, stateName)
 end
 
 local function _invokeCallback(self, state, callbackName, ...)
-  if state then state[callbackName](self, ...) end
+  if state and state[callbackName] then state[callbackName](self, ...) end
 end
 
 local function _getCurrentState(self)
