@@ -168,7 +168,9 @@ function Stateful:popState(stateName)
   _invokeCallback(self, oldState, 'poppedState')
   _invokeCallback(self, oldState, 'exitedState')
 
-  table.remove(self.__stateStack, oldStateIndex)
+  if oldStateIndex ~= 0 then
+    table.remove(self.__stateStack, oldStateIndex)
+  end
 
   local newState = _getCurrentState(self)
 
