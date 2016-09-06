@@ -177,11 +177,12 @@ end
 
 function Stateful:popAllStates()
   local size = #self.__stateStack
-  for i=1,size do self:popState() end
+  for _=1,size do self:popState() end
 end
 
 function Stateful:getStateStackDebugInfo()
-  local info, state = {}, nil
+  local info = {}
+  local state
   for i=#self.__stateStack,1,-1 do
     state = self.__stateStack[i]
     table.insert(info, _getStateName(self, state))

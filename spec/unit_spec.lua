@@ -118,7 +118,7 @@ describe("A Stateful class", function()
           local count = function() counter = counter + 1 end
           local Jumping  = Enemy:addState('Jumping')
           local Firing   = Enemy:addState('Firing')
-          local Shouting = Enemy:addState('Shouting')
+          Enemy:addState('Shouting')
 
           Jumping.exitedState   = count
           Firing.exitedState    = count
@@ -147,7 +147,7 @@ describe("A Stateful class", function()
   end)
 
   describe("state stacking", function()
-    local Pushed, New, e
+    local Piled, New, e
     before_each(function()
       function Enemy:foo() return 'foo' end
 
@@ -274,8 +274,8 @@ describe("A Stateful class", function()
       assert.equals(#info, 0)
     end)
     it("returns the name of the current state", function()
-      local State1 = Enemy:addState('State1')
-      local State2 = Enemy:addState('State2')
+      Enemy:addState('State1')
+      Enemy:addState('State2')
       local e = Enemy:new()
 
       e:gotoState('State1')
