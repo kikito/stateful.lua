@@ -101,15 +101,15 @@ describe("A Stateful class", function()
       end)
 
       it("passes all additional arguments to enteredState and exitedState", function()
-        local FooEnemy = Enemy:addState("FooEnemy")
-        local testValue = "Bar"
+        local State1 = Enemy:addState("State1")
+        local State2 = Enemy:addState("State2")
 
-        local validateVarargs = function(self, ...) assert.equals(..., testValue) end
-        FooEnemy.enteredState = validateVarargs
-        FooEnemy.exitedState = validateVarargs
+        State1.exitedState = function(self, x) assert.equals(x, "foobar") end
+        State2.enteredState = function(self, x) assert.equals(x, "foobar") end
 
         local e = Enemy:new()
-        e:gotoState("FooEnemy", testValue)
+        e:gotoState("State1")
+        e:gotoState("State2", "foobar")
       end)
 
       describe('when there are several states in the stack', function()

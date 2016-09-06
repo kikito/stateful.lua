@@ -130,7 +130,7 @@ end
 
 function Stateful:gotoState(stateName, ...)
 
-  self:popAllStates()
+  self:popAllStates(...)
 
   if stateName == nil then
     self.__stateStack = { }
@@ -155,15 +155,15 @@ function Stateful:pushState(stateName)
   _invokeCallback(self, newState, 'enteredState')
 end
 
-function Stateful:popState(stateName)
+function Stateful:popState(stateName, ...)
 
   local oldStateIndex = _getStateIndexFromStackByName(self, stateName)
   local oldState
   if oldStateIndex then
     oldState = self.__stateStack[oldStateIndex]
 
-    _invokeCallback(self, oldState, 'poppedState')
-    _invokeCallback(self, oldState, 'exitedState')
+    _invokeCallback(self, oldState, 'poppedState', ...)
+    _invokeCallback(self, oldState, 'exitedState', ...)
 
     table.remove(self.__stateStack, oldStateIndex)
   end
@@ -171,13 +171,13 @@ function Stateful:popState(stateName)
   local newState = _getCurrentState(self)
 
   if oldState ~= newState then
-    _invokeCallback(self, newState, 'continuedState')
+    _invokeCallback(self, newState, 'continuedState', ...)
   end
 end
 
-function Stateful:popAllStates()
+function Stateful:popAllStates(...)
   local size = #self.__stateStack
-  for _=1,size do self:popState() end
+  for _=1,size do self:popState(nil, ...) end
 end
 
 function Stateful:getStateStackDebugInfo()
