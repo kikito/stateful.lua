@@ -144,15 +144,15 @@ function Stateful:gotoState(stateName, ...)
 
 end
 
-function Stateful:pushState(stateName)
+function Stateful:pushState(stateName,...)
   local oldState = _getCurrentState(self)
   _invokeCallback(self, oldState, 'pausedState')
 
   local newState = _getStateFromClassByName(self, stateName)
   table.insert(self.__stateStack, newState)
 
-  _invokeCallback(self, newState, 'pushedState')
-  _invokeCallback(self, newState, 'enteredState')
+  _invokeCallback(self, newState, 'pushedState',...)
+  _invokeCallback(self, newState, 'enteredState',...)
 end
 
 function Stateful:popState(stateName, ...)
