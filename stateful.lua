@@ -1,5 +1,5 @@
 local Stateful = {
-  _VERSION     = 'Stateful 1.0.4 (2017-08)',
+  _VERSION     = 'Stateful 1.0.5 (2017-08)',
   _DESCRIPTION = 'Stateful classes for middleclass',
   _URL         = 'https://github.com/kikito/stateful.lua',
   _LICENSE     = [[
