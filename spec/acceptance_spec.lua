@@ -119,7 +119,8 @@ describe("A Stateful class", function()
     assert.equals(artist:all(), "clap clap clappity clap - I can't sing - Only thing about me is the way I walk")
 
     artist:pushState('SteveWonder')
-    assert.equals(artist:all(), "clap clap clappity clap - you are the sunshine of my life - Only thing about me is the way I walk")
+    assert.equals(artist:all(),
+                  "clap clap clappity clap - you are the sunshine of my life - Only thing about me is the way I walk")
 
     artist:popAllStates()
     assert.equals(artist:all(), "up down left right - la donna e mobile - My health is 10")
@@ -129,7 +130,8 @@ describe("A Stateful class", function()
     artist:pushState('FredAstaire')
     artist:pushState('SteveWonder')
     artist:popState('FredAstaire')
-    assert.equals(artist:all(), "I can't dance - you are the sunshine of my life - Only thing about me is the way I walk")
+    assert.equals(artist:all(),
+                  "I can't dance - you are the sunshine of my life - Only thing about me is the way I walk")
 
     artist:popState()
     assert.equals(artist:all(), "I can't dance - I can't sing - Only thing about me is the way I walk")

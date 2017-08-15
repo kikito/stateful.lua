@@ -1,13 +1,35 @@
--- stateful.lua - v1.0.3 (2014-10)
+local Stateful = {
+  _VERSION     = 'Stateful 1.0.4 (2017-08)',
+  _DESCRIPTION = 'Stateful classes for middleclass',
+  _URL         = 'https://github.com/kikito/stateful.lua',
+  _LICENSE     = [[
+    MIT LICENSE
+
+    Copyright (c) 2017 Enrique García Cota
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ]]
+}
+
 -- requires middleclass >2.0
-
--- Copyright (c) 2011 Enrique García Cota
--- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
--- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--- Based on YaciCode, from Julien Patte and LuaObject, from Sebastien Rocca-Serra
-
-local Stateful = { static = {} }
+Stateful.static = {}
 
 local _callbacks = {
   enteredState = 1,
@@ -74,15 +96,23 @@ local function _modifyAllocateMethod(klass)
 end
 
 local function _assertType(val, name, expected_type, type_to_s)
-  assert(type(val) == expected_type, "Expected " .. name .. " to be of type " .. (type_to_s or expected_type) .. ". Was " .. tostring(val) .. "(" .. type(val) .. ")")
+  if type(val) ~= expected_type then
+    error("Expected " .. name .. " to be of type " ..
+          (type_to_s or expected_type) .. ". Was " ..
+          tostring(val) .. "(" .. type(val) .. ")")
+  end
 end
 
 local function _assertInexistingState(klass, stateName)
-  assert(klass.states[stateName] == nil, "State " .. tostring(stateName) .. " already exists on " .. tostring(klass) )
+  if klass.states[stateName] ~= nil then
+    error("State " .. tostring(stateName) .. " already exists on " .. tostring(klass) )
+  end
 end
 
 local function _assertExistingState(self, state, stateName)
-  assert(state, "The state " .. stateName .. " was not found in " .. tostring(self.class) )
+  if not state then
+    error("The state " .. stateName .. " was not found in " .. tostring(self.class))
+  end
 end
 
 local function _invokeCallback(self, state, callbackName, ...)
